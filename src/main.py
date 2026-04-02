@@ -20,10 +20,39 @@ def main():
     # Update settings with CLI override if provided
     settings.sync_time = args.time
 
+    # Redaction filter for sensitive values
+    def redact_secrets(record):
+        # List of strings to redact
+        secrets = [
+            settings.fortuneo_pwd.get_secret_value(),
+            settings.sure_api_key.get_secret_value(),
+        ]
+        if settings.discord_webhook_url:
+            secrets.append(settings.discord_webhook_url.get_secret_value())
+            
+        for secret in secrets:
+            if secret and len(secret) > 5: # Only redact if non-empty and long enough
+                record["message"] = record["message"].replace(secret, "********")
+        return True
+
     # Configure Loguru
     logger.remove()
-    logger.add(sys.stderr, level="INFO", format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{message}</cyan>")
-    logger.add("logs/app.log", rotation="1 week", level="DEBUG")
+    logger.add(
+        sys.stderr, 
+        level="INFO", 
+        format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{message}</cyan>",
+        backtrace=False,
+        diagnose=False,
+        filter=redact_secrets
+    )
+    logger.add(
+        "logs/app.log", 
+        rotation="1 week", 
+        level="DEBUG",
+        backtrace=True,
+        diagnose=False,
+        filter=redact_secrets
+    )
 
     # Initialize components
     provider = FortuneoProvider()

@@ -12,7 +12,7 @@ class SureDestination(BaseDestination):
 
     def __init__(self):
         self.headers = {
-            "X-Api-Key": settings.sure_api_key,
+            "X-Api-Key": settings.sure_api_key.get_secret_value(),
             "Accept": "application/json",
             "Content-Type": "application/json"
         }

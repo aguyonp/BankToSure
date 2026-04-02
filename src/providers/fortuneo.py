@@ -39,7 +39,7 @@ class FortuneoProvider(BaseProvider):
                     pass
 
                 page.get_by_role("textbox", name="Identifiant").fill(settings.fortuneo_id)
-                page.get_by_role("textbox", name="Mot de passe").fill(settings.fortuneo_pwd)
+                page.get_by_role("textbox", name="Mot de passe").fill(settings.fortuneo_pwd.get_secret_value())
                 page.get_by_role("button", name="Connexion").click()
                 page.wait_for_load_state("networkidle")
 

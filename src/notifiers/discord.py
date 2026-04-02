@@ -26,7 +26,7 @@ class DiscordNotifier(BaseNotifier):
         }
         
         try:
-            res = requests.post(settings.discord_webhook_url, json=payload)
+            res = requests.post(settings.discord_webhook_url.get_secret_value(), json=payload)
             res.raise_for_status()
         except Exception as e:
             logger.error(f"Failed to send Discord notification: {e}")

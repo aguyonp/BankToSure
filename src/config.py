@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import SecretStr
 from typing import Optional
 
 class Settings(BaseSettings):
@@ -7,15 +8,15 @@ class Settings(BaseSettings):
 
     # Fortuneo
     fortuneo_id: str
-    fortuneo_pwd: str
+    fortuneo_pwd: SecretStr
     
     # Sure
-    sure_api_key: str
+    sure_api_key: SecretStr
     sure_account_id: str
     sure_url: str = "http://localhost:3000"
     
     # Discord
-    discord_webhook_url: Optional[str] = None
+    discord_webhook_url: Optional[SecretStr] = None
     
     # App Config
     download_dir: str = "./downloads"
