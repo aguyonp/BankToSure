@@ -1,0 +1,27 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.venv/
+env/
+venv/
+ENV/
+
+# Configuration and Secrets
+.env
+.env.*
+
+# Logs
+logs/
+*.log
+
+# Project specific
+downloads/
+.ruff_cache/
+.python-version
+
+# OS files
+.DS_Store
+Thumbs.db

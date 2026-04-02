@@ -1,0 +1,21 @@
+[project]
+name = "banktosure"
+version = "0.1.0"
+description = "Automated bridge to sync Fortuneo bank transactions into the Sure finance platform with smart deduplication."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "loguru>=0.7.3",
+    "playwright>=1.58.0",
+    "pydantic>=2.12.5",
+    "pydantic-settings>=2.13.1",
+    "python-dotenv>=1.2.2",
+    "requests>=2.33.1",
+    "schedule>=1.2.2",
+]
+
+[tool.uv]
+package = true
+
+[project.scripts]
+sync-bank = "src.main:main"

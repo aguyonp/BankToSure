@@ -1,0 +1,74 @@
+Metadata-Version: 2.4
+Name: banktosure
+Version: 0.1.0
+Summary: Automated bridge to sync Fortuneo bank transactions into the Sure finance platform with smart deduplication.
+Requires-Python: >=3.13
+Description-Content-Type: text/markdown
+Requires-Dist: loguru>=0.7.3
+Requires-Dist: playwright>=1.58.0
+Requires-Dist: pydantic>=2.12.5
+Requires-Dist: pydantic-settings>=2.13.1
+Requires-Dist: python-dotenv>=1.2.2
+Requires-Dist: requests>=2.33.1
+Requires-Dist: schedule>=1.2.2
+
+# BankToSure 🚀
+
+Automated bridge to sync bank transactions into the Sure finance platform.
+
+## 🏦 Supported Banks
+
+| Bank | Status | Provider |
+| :--- | :--- | :--- |
+| **Fortuneo** | ✅ Supported | `FortuneoProvider` |
+
+## 🐳 Docker Mode
+
+**Build:**
+```bash
+docker build -t banktosure .
+```
+
+**Run (Scheduled - 09:00 daily):**
+```bash
+docker run -d \
+  --name banktosure \
+  --env-file .env \
+  --restart unless-stopped \
+  banktosure
+```
+
+**Manual Sync (Inside container):**
+```bash
+docker exec banktosure uv run main.py --days 30
+```
+
+## 💻 Local Mode (UV)
+
+**Setup:**
+```bash
+uv sync
+```
+
+**Run Sync:**
+```bash
+uv run main.py
+```
+
+**One-time Historical Import:**
+```bash
+uv run main.py --days 365
+```
+
+**Dry Run:**
+```bash
+uv run main.py --dry-run
+```
+
+## ⚙️ Configuration
+Fill your `.env` based on `.env.example`.
+- `TZ`: Timezone (default: Europe/Paris)
+- `SYNC_TIME`: Schedule time in HH:MM format (default: 09:00)
+- `FORTUNEO_ID` / `FORTUNEO_PWD`
+- `SURE_API_KEY` / `SURE_ACCOUNT_ID` / `SURE_URL`
+- `DISCORD_WEBHOOK_URL`

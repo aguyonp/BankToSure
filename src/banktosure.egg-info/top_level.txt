@@ -1,0 +1,6 @@
+config
+core
+destinations
+main
+notifiers
+providers
