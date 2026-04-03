@@ -10,7 +10,7 @@ WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
 
-RUN uv sync --frozen
+RUN uv sync --frozen --no-install-project
 
 RUN uv run playwright install-deps chromium \
     && uv run playwright install chromium \
@@ -18,5 +18,7 @@ RUN uv run playwright install-deps chromium \
 
 COPY . .
 
-ENTRYPOINT ["uv", "run", "python", "main.py"]
+RUN uv sync --frozen
+
+ENTRYPOINT ["uv", "run", "--no-sync", "python", "main.py"]
 CMD ["--schedule"]
