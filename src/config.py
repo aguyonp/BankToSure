@@ -18,6 +18,11 @@ class Settings(BaseSettings):
     # Discord
     discord_webhook_url: Optional[SecretStr] = None
     
+    # AI Categorizer
+    groq_api_key: Optional[SecretStr] = None
+    category_to_verify: str = "To verify"
+    confidence_threshold: int = 80
+    
     # App Config
     download_dir: str = "./downloads"
     fetch_days: int = 30

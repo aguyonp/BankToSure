@@ -5,6 +5,7 @@ from loguru import logger
 from .providers.fortuneo import FortuneoProvider
 from .destinations.sure import SureDestination
 from .notifiers.discord import DiscordNotifier
+from .categorizers.groq_categorizer import GroqCategorizer
 from .core.orchestrator import SyncOrchestrator
 from .config import settings
 
@@ -22,16 +23,17 @@ def main():
 
     # Redaction filter for sensitive values
     def redact_secrets(record):
-        # List of strings to redact
         secrets = [
             settings.fortuneo_pwd.get_secret_value(),
             settings.sure_api_key.get_secret_value(),
         ]
         if settings.discord_webhook_url:
             secrets.append(settings.discord_webhook_url.get_secret_value())
+        if settings.groq_api_key:
+            secrets.append(settings.groq_api_key.get_secret_value())
             
         for secret in secrets:
-            if secret and len(secret) > 5: # Only redact if non-empty and long enough
+            if secret and len(secret) > 5:
                 record["message"] = record["message"].replace(secret, "********")
         return True
 
@@ -58,12 +60,14 @@ def main():
     provider = FortuneoProvider()
     destination = SureDestination()
     notifier = DiscordNotifier()
+    categorizer = GroqCategorizer() if settings.groq_api_key else None
 
     # Run orchestration
     orchestrator = SyncOrchestrator(
         provider=provider,
         destination=destination,
-        notifier=notifier
+        notifier=notifier,
+        categorizer=categorizer
     )
     
     if args.schedule:

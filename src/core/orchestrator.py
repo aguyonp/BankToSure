@@ -6,10 +6,11 @@ from .base import BaseProvider, BaseDestination, BaseNotifier
 class SyncOrchestrator:
     """Main application orchestrator."""
 
-    def __init__(self, provider: BaseProvider, destination: BaseDestination, notifier: BaseNotifier):
+    def __init__(self, provider: BaseProvider, destination: BaseDestination, notifier: BaseNotifier, categorizer=None):
         self.provider = provider
         self.destination = destination
         self.notifier = notifier
+        self.categorizer = categorizer
 
     def run(self, days: int, dry_run: bool = False):
         """Execute a single sync process."""
@@ -38,11 +39,18 @@ class SyncOrchestrator:
             else:
                 success, errors, duplicates = self.destination.push_transactions(transactions)
             
+            # Lancement de l'IA après le push
+            cat_msg = ""
+            if not dry_run and success > 0 and self.categorizer:
+                categorized_count = self.categorizer.run()
+                cat_msg = f"\n🤖 **{categorized_count}** transactions auto-catégorisées."
+
             result_msg = (
                 f"Sync completed{mode_str}.\n"
                 f"✅ **{success}** transactions processed.\n"
                 f"⏭️ **{duplicates}** duplicates ignored.\n"
                 f"⚠️ **{errors}** errors."
+                f"{cat_msg}"
             )
             logger.info(f"Results: {success} handled, {duplicates} skipped, {errors} errors")
             
