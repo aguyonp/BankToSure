@@ -53,7 +53,7 @@ class GroqCategorizer:
             for t in res.json().get('transactions', []):
                 if t.get('category') and t['category']['name'] != settings.category_to_verify:
                     cat_name = t['category']['name']
-                    history_lines.append(f"- L'achat '{t['name']}' a été classé dans '{cat_name}'")
+                    history_lines.append(f"- L'achat '{t['name']}' avait été classé dans '{cat_name}'")
         
         unique_history = list(set(history_lines))
         return "\n".join(unique_history) if unique_history else "Aucun historique pertinent trouvé."
@@ -84,6 +84,9 @@ class GroqCategorizer:
         RÉPONSE ATTENDUE EN JSON STRICTEMENT :
         - "category_number": le chiffre exact (en string) de la catégorie choisie.
         - "confidence": un entier de 0 à 100 indiquant ta certitude. (Mets moins de {settings.confidence_threshold} si le nom est obscur).
+        
+        Exemple :
+        {{"category_number": "3", "confidence": 95}}
         """
         
         headers = {"Authorization": f"Bearer {self.groq_api_key}", "Content-Type": "application/json"}
@@ -119,7 +122,12 @@ class GroqCategorizer:
         if not raw_cats: return 0
 
         numbered_cats = {str(i): {"id": c_id, "name": name} for i, (c_id, name) in enumerate(raw_cats.items(), 1)}
-        to_verify_num = next((num for num, data in numbered_cats.items() if data['name'].lower() == settings.category_to_verify.lower()), None)
+        
+        to_verify_num = None
+        for num, data in numbered_cats.items():
+            if data['name'].lower() == settings.category_to_verify.lower():
+                to_verify_num = num
+                break
         
         if not to_verify_num:
             logger.warning(f"Fallback category '{settings.category_to_verify}' not found in Sure!")
@@ -134,6 +142,7 @@ class GroqCategorizer:
         success_count = 0
         for tx in transactions:
             tx_id, tx_name, tx_amount = tx['id'], tx['name'], tx['amount']
+            logger.debug(f"Analyzing: {tx_name} ({tx_amount} €)")
             
             history = self.get_similar_transactions_history(tx_name)
             if history != "Aucun historique pertinent trouvé.":
@@ -145,7 +154,13 @@ class GroqCategorizer:
                 continue
                 
             predicted_num = ai_response.get("category_number")
-            confidence = ai_response.get("confidence", 0)
+            try:
+                confidence = int(ai_response.get("confidence", 0))
+            except (ValueError, TypeError):
+                confidence = 0
+            
+            if predicted_num is not None:
+                predicted_num = str(predicted_num)
             
             if confidence < settings.confidence_threshold and to_verify_num:
                 logger.debug(f"Low confidence ({confidence}%). Routing to '{settings.category_to_verify}'.")
